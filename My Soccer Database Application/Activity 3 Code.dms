@@ -1,0 +1,71 @@
+package com.example.android_sp17.soccerdatabase;
+
+import android.content.Context;
+import android.content.Intent;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
+import android.support.v7.app.AppCompatActivity;
+import android.os.Bundle;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
+import android.widget.TextView;
+import android.widget.Toast;
+
+import com.example.android_sp17.soccerdatabase.R;
+
+import java.util.ArrayList;
+public class Main3Activity extends AppCompatActivity {
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+        Intent intent = getIntent();
+        String country = intent.getStringExtra("country");
+        String countryid = intent.getStringExtra("countryid");
+        ListView lv = (ListView) findViewById(R.id.list1);
+        ArrayList values = queryDB(countryid);
+        ArrayAdapter adapter = new ArrayAdapter(this, android.R.layout.simple_list_item_1, values);
+
+        lv.setAdapter(adapter);
+        lv.setOnItemClickListener(new AdapterView.OnItemClickListener(){
+            public void onItemClick(AdapterView parent, View view, int position, long id){
+                String country = ((TextView)view).getText().toString();
+                String countryname = country.substring(country.indexOf('-')+1, country.length());
+                String countryid = country.substring(0, country.indexOf(' '));
+               // System.out.println(countryid);
+                Intent countryIntent = new Intent(getApplicationContext(), Main4Activity.class);
+                countryIntent.putExtra("country", countryname);
+                countryIntent.putExtra("countryid", countryid);
+                startActivity(countryIntent);
+
+            }
+        });
+    }
+    ArrayList
+    queryDB(String countryid)
+    {
+        ArrayList list = new ArrayList ();
+
+        Cursor cursor;
+        try {
+            SQLiteDatabase db = openOrCreateDatabase("soccerdb", Context.MODE_PRIVATE, null);
+            cursor = db.rawQuery("select id, player_name from Player where teamID ='" + countryid+ "';", null);
+            while (cursor.moveToNext()) {
+                String n = cursor.getString(0);
+                String n2 = cursor.getString(1);
+                list.add(n+" "+n2);
+            }
+            cursor.close();
+            db.close();
+        }
+        catch (Exception e) {
+            Toast.makeText(getApplicationContext(), "Error in opening DB", Toast.LENGTH_LONG);
+        }
+        return list;
+    }
+
+
+
+}
